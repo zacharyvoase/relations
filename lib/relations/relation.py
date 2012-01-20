@@ -205,14 +205,19 @@ class Relation(object):
             raise UndefinedFields("Undefined fields used in rename(): %r" %
                                   undefined_fields)
 
-        # Mapping from old field name => new field name.
+        # Construct a dict mapping from old field name => new field name.
         rename = invert_bijection(new_fields)
+        for old_field_name in self.heading:
+            rename.setdefault(old_field_name, old_field_name)
 
-        new_relation = type(self)(*map(lambda f: rename.get(f, f),
-                                       self.tuple._fields))
-        new_relation.tuples.update(
-            (tuple_, tuple_) for tuple_ in
-                (new_relation.tuple(*tuple_) for tuple_ in self.tuples))
+        new_relation = type(self)(*rename.values())
+
+        def rename_tuple(t):
+            return dict((new_name, getattr(t, old_name))
+                        for (old_name, new_name) in rename.iteritems())
+
+        for _tuple in self:
+            new_relation.add(**rename_tuple(_tuple))
         return new_relation
 
 

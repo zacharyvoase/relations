@@ -85,9 +85,9 @@ def test_rename_creates_a_new_relation():
     employees.add(employee_name='Alice', dept_name='Finance')
     employees.add(employee_name='Bob', dept_name='Sales')
 
-    new_emps = employees.rename(name='employee_name', dept='dept_name')
-    assert new_emps.contains(name='Alice', dept='Finance')
-    assert new_emps.contains(name='Bob', dept='Sales')
+    new_emps = employees.rename(name='employee_name', section='dept_name')
+    assert new_emps.contains(name='Alice', section='Finance')
+    assert new_emps.contains(name='Bob', section='Sales')
 
 
 def test_rename_raises_error_on_undefined_fields():
