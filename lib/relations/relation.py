@@ -36,10 +36,7 @@ class Relation(object):
     def __init__(self, *fields):
         self.heading = frozenset(fields)
         self.tuple = urecord.Record(*sorted(fields))
-        # Mapping of tuples => ids.
         self.tuples = {}
-        # Mapping of ids => tuples.
-        self.index = {}
 
     def __repr__(self):
         return '<Relation%r>' % (self.tuple._fields,)
@@ -62,27 +59,45 @@ class Relation(object):
         return self.heading == other.heading
 
     @check_union_compatible
+    def update(self, other):
+
+        """
+        Merge this relation with another union-compatible relation.
+
+        This method modifies (and returns) this relation. The other relation
+        is not modified.
+        """
+
+        self.tuples.update(other.tuples)
+        return self
+
+    @check_union_compatible
     def union(self, other):
-        new_relation = self.clone()
-        for tuple_ in set(self).union(other):
-            new_relation.add(*tuple_)
-        return new_relation
+        """Safe set union between two union-compatible relations."""
+
+        return self.clone().update(self).update(other)
 
     @check_union_compatible
     def intersection(self, other):
+        """Safe set intersection between two union-compatible relations."""
+
         new_relation = self.clone()
-        for tuple_ in set(self).intersection(set(other)):
-            new_relation.add(*tuple_)
+        new_relation.tuples.update(
+            (tuple_, tuple_) for tuple_ in
+                set(self.tuples).intersection(set(other.tuples)))
         return new_relation
 
     @check_union_compatible
     def difference(self, other):
+        """Safe set difference between two union-compatible relations."""
+
         new_relation = self.clone()
-        for tuple_ in set(self).difference(set(other)):
-            new_relation.add(*tuple_)
+        new_relation.tuples.update(
+            (tuple_, tuple_) for tuple_ in
+                set(self.tuples).difference(set(other.tuples)))
         return new_relation
 
-    def add(self, *args, **kwargs):
+    def add(self, **kwargs):
 
         """
         Add a tuple to this relation.
@@ -90,21 +105,20 @@ class Relation(object):
         This method attempts to be as efficient as possible, re-using the same
         Python object if the tuple already exists in this relation.
 
-        Arguments are given in either positional or keyword form:
+        Arguments should be given in keyword form:
 
             >>> employees = Relation('name', 'department')
             >>> alice = employees.add(name='Alice', department='Finance')
-            >>> bob = employees.add('Bob', 'Sales')
+            >>> alice.name
+            'Alice'
+            >>> alice.department
+            'Finance'
         """
 
-        tuple_ = self.tuple(*args, **kwargs)
-        if tuple_ in self.tuples:
-            return self.index[self.tuples[tuple_]]
-        self.tuples[tuple_] = id(tuple_)
-        self.index[id(tuple_)] = tuple_
-        return tuple_
+        tuple_ = self.tuple(**kwargs)
+        return self.tuples.setdefault(tuple_, tuple_)
 
-    def contains(self, *args, **kwargs):
+    def contains(self, **kwargs):
 
         """
         Determine if this relation contains the specified tuple.
@@ -121,7 +135,7 @@ class Relation(object):
             True
         """
 
-        return self.tuple(*args, **kwargs) in self
+        return self.tuple(**kwargs) in self
 
     def select(self, predicate):
 
@@ -132,8 +146,8 @@ class Relation(object):
         """
 
         new_relation = self.clone()
-        for tuple_ in filter(predicate, self.tuples):
-            new_relation.add(*tuple_)
+        new_relation.tuples.update(
+            (tuple_, tuple_) for tuple_ in filter(predicate, self.tuples))
         return new_relation
 
     def project(self, *fields):
@@ -168,10 +182,10 @@ class Relation(object):
         indices = map(self.tuple._fields.index, fields)
         # Continued:
         # project_one((a='foo', b='bar', c='baz')) => ('foo', 'baz')
-        project_one = lambda t: map(t.__getitem__, indices)
+        project_one = lambda t: new_relation.tuple(*map(t.__getitem__, indices))
 
-        for tuple_ in self.tuples:
-            new_relation.add(*project_one(tuple_))
+        new_relation.tuples.update(
+            (tuple_, tuple_) for tuple_ in map(project_one, self.tuples))
         return new_relation
 
     def rename(self, **new_fields):
@@ -196,8 +210,9 @@ class Relation(object):
 
         new_relation = type(self)(*map(lambda f: rename.get(f, f),
                                        self.tuple._fields))
-        for tuple_ in self.tuples:
-            new_relation.add(*tuple_)
+        new_relation.tuples.update(
+            (tuple_, tuple_) for tuple_ in
+                (new_relation.tuple(*tuple_) for tuple_ in self.tuples))
         return new_relation
 
 
