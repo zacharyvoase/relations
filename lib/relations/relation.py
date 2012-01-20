@@ -19,6 +19,15 @@ class Relation(object):
     def __repr__(self):
         return '<Relation%r>' % (self.tuple._fields,)
 
+    def __len__(self):
+        return len(self.tuples)
+
+    def __contains__(self, tuple_):
+        return tuple_ in self.tuples
+
+    def __iter__(self):
+        return iter(self.tuples)
+
     def clone(self):
         """Create a new, empty relation with the same heading as this one."""
 
@@ -48,15 +57,6 @@ class Relation(object):
         self.tuples[tuple_] = id(tuple_)
         self.index[id(tuple_)] = tuple_
         return tuple_
-
-    def __len__(self):
-        return len(self.tuples)
-
-    def __contains__(self, tuple_):
-        return tuple_ in self.tuples
-
-    def __iter__(self):
-        pass
 
     def contains(self, *args, **kwargs):
 
