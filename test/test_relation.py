@@ -1,3 +1,5 @@
+from nose.tools import assert_raises
+
 import relations
 
 
@@ -59,6 +61,15 @@ def test_project_creates_a_new_relation():
     assert len(names) == 2
 
 
+def test_project_raises_error_on_undefined_fields():
+    employees = relations.Relation('employee_name', 'dept_name')
+    employees.add(employee_name='Alice', dept_name='Finance')
+    employees.add(employee_name='Bob', dept_name='Sales')
+
+    assert_raises(relations.RelationalError,
+                  lambda: employees.project('foobar'))
+
+
 def test_projected_relations_are_sets():
     employees = relations.Relation('employee_name', 'dept_name')
     employees.add(employee_name='Alice', dept_name='Finance')
@@ -77,3 +88,12 @@ def test_rename_creates_a_new_relation():
     new_emps = employees.rename(name='employee_name', dept='dept_name')
     assert new_emps.contains(name='Alice', dept='Finance')
     assert new_emps.contains(name='Bob', dept='Sales')
+
+
+def test_rename_raises_error_on_undefined_fields():
+    employees = relations.Relation('employee_name', 'dept_name')
+    employees.add(employee_name='Alice', dept_name='Finance')
+    employees.add(employee_name='Bob', dept_name='Sales')
+
+    assert_raises(relations.RelationalError,
+                  lambda: employees.rename(newfield='foobar'))

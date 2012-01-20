@@ -36,18 +36,18 @@ class Relation(object):
             >>> bob = employees.add('Bob', 'Sales')
         """
 
-        tuple = self.tuple(*args, **kwargs)
-        if tuple in self.tuples:
-            return self.index[self.tuples[tuple]]
-        self.tuples[tuple] = id(tuple)
-        self.index[id(tuple)] = tuple
-        return tuple
+        tuple_ = self.tuple(*args, **kwargs)
+        if tuple_ in self.tuples:
+            return self.index[self.tuples[tuple_]]
+        self.tuples[tuple_] = id(tuple_)
+        self.index[id(tuple_)] = tuple_
+        return tuple_
 
     def __len__(self):
         return len(self.tuples)
 
-    def __contains__(self, tuple):
-        return tuple in self.tuples
+    def __contains__(self, tuple_):
+        return tuple_ in self.tuples
 
     def __iter__(self):
         pass
@@ -69,8 +69,7 @@ class Relation(object):
             True
         """
 
-        tuple = self.tuple(*args, **kwargs)
-        return tuple in self
+        return self.tuple(*args, **kwargs) in self
 
     def select(self, predicate):
 
@@ -81,8 +80,8 @@ class Relation(object):
         """
 
         new_relation = self.clone()
-        for tuple in filter(predicate, self.tuples):
-            new_relation.add(*tuple)
+        for tuple_ in filter(predicate, self.tuples):
+            new_relation.add(*tuple_)
         return new_relation
 
     def project(self, *fields):
@@ -119,8 +118,8 @@ class Relation(object):
         # project_one((a='foo', b='bar', c='baz')) => ('foo', 'baz')
         project_one = lambda t: map(t.__getitem__, indices)
 
-        for tuple in self.tuples:
-            new_relation.add(*project_one(tuple))
+        for tuple_ in self.tuples:
+            new_relation.add(*project_one(tuple_))
         return new_relation
 
     def rename(self, **new_fields):
@@ -136,7 +135,7 @@ class Relation(object):
         if not is_bijection(new_fields):
             raise RelationalError("Field mapping is not one-to-one")
         elif not set(new_fields.values()).issubset(self.heading):
-            undefined_fields = tuple(set(new_fields.values).difference(self.heading))
+            undefined_fields = tuple(set(new_fields.values()).difference(self.heading))
             raise RelationalError("Undefined fields used in rename(): %r" %
                                   undefined_fields)
 
@@ -145,8 +144,8 @@ class Relation(object):
 
         new_relation = type(self)(*map(lambda f: rename.get(f, f),
                                        self.tuple._fields))
-        for tuple in self.tuples:
-            new_relation.add(*tuple)
+        for tuple_ in self.tuples:
+            new_relation.add(*tuple_)
         return new_relation
 
 
