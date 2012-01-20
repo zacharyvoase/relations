@@ -50,6 +50,20 @@ class Relation(object):
     def is_union_compatible(self, other):
         return self.heading == other.heading
 
+    def union(self, other):
+        if not self.is_union_compatible(other):
+            raise NotUnionCompatible
+
+        new_relation = self.clone()
+        for tuple_ in self:
+            new_relation.add(*tuple_)
+        for tuple_ in other:
+            # We hqve to use keywords instead of positional arguments because
+            # we don't know what order the fields are specified in on the other
+            # relation.
+            new_relation.add(**tuple_._asdict())
+        return new_relation
+
     def add(self, *args, **kwargs):
 
         """
