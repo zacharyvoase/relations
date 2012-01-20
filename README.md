@@ -17,7 +17,7 @@ is consistent between equivalent but separate relations. Add tuples to the
 relation:
 
     >>> alice = employees.add(employee_name='Alice', dept_name='Finance')
-    >>> bob = employees.add(employee_name='Alice', dept_name='Finance')
+    >>> bob = employees.add(employee_name='Bob', dept_name='Sales')
     >>> len(employees)
     2
 
