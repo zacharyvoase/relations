@@ -26,7 +26,7 @@ def test_union_contains_elements_from_both_relations():
     assert union.contains(name='Bob', age=32, gender='M')
 
 
-def test_union_raises_error_if_not_union_compatible():
+def test_set_operations_raise_error_if_not_union_compatible():
     rel1 = relations.Relation('name', 'age', 'gender')
     rel2 = relations.Relation('symbol', 'price')
     rel1.add(name='Alice', age=25, gender='F')
@@ -34,6 +34,10 @@ def test_union_raises_error_if_not_union_compatible():
 
     assert_raises(relations.NotUnionCompatible,
                   lambda: rel1.union(rel2))
+    assert_raises(relations.NotUnionCompatible,
+                  lambda: rel1.intersection(rel2))
+    assert_raises(relations.NotUnionCompatible,
+                  lambda: rel1.difference(rel2))
 
 
 def test_intersection_contains_only_elements_present_in_both_relations():
