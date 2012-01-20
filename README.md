@@ -40,7 +40,7 @@ A relation implements the relational algebra, including the unary operators
     >>> names.contains(employee_name='Charlie')
     False
 
-**Rename**:
+and **Rename**:
 
     >>> employees_renamed = employees.rename(name='employee_name')
     >>> employees_renamed.contains(name='Bob')
