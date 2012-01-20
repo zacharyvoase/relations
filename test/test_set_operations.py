@@ -34,3 +34,31 @@ def test_union_raises_error_if_not_union_compatible():
 
     assert_raises(relations.NotUnionCompatible,
                   lambda: rel1.union(rel2))
+
+
+def test_intersection_contains_only_elements_present_in_both_relations():
+    rel1 = relations.Relation('name', 'age', 'gender')
+    rel2 = relations.Relation('gender', 'age', 'name')
+    rel1.add(name='Alice', age=25, gender='F')
+    rel1.add(name='Bob', age=32, gender='M')
+    rel1.add(name='Charlie', age=65, gender='M')
+    rel2.add(name='Bob', age=32, gender='M')
+    rel2.add(name='Charlie', age=65, gender='M')
+
+    intersection = rel1.intersection(rel2)
+    assert len(intersection) == 2
+    assert not intersection.contains(name='Alice', age=25, gender='F')
+
+
+def test_difference_contains_elements_present_in_self_but_not_in_other():
+    rel1 = relations.Relation('name', 'age', 'gender')
+    rel2 = relations.Relation('gender', 'age', 'name')
+    rel1.add(name='Alice', age=25, gender='F')
+    rel1.add(name='Bob', age=32, gender='M')
+    rel1.add(name='Charlie', age=65, gender='M')
+    rel2.add(name='Bob', age=32, gender='M')
+    rel2.add(name='Charlie', age=65, gender='M')
+
+    diff = rel1.difference(rel2)
+    assert len(diff) == 1
+    assert diff.contains(name='Alice', age=25, gender='F')

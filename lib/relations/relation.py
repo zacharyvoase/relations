@@ -55,13 +55,26 @@ class Relation(object):
             raise NotUnionCompatible
 
         new_relation = self.clone()
-        for tuple_ in self:
+        for tuple_ in set(self).union(other):
             new_relation.add(*tuple_)
-        for tuple_ in other:
-            # We hqve to use keywords instead of positional arguments because
-            # we don't know what order the fields are specified in on the other
-            # relation.
-            new_relation.add(**tuple_._asdict())
+        return new_relation
+
+    def intersection(self, other):
+        if not self.is_union_compatible(other):
+            raise NotUnionCompatible
+
+        new_relation = self.clone()
+        for tuple_ in set(self).intersection(set(other)):
+            new_relation.add(*tuple_)
+        return new_relation
+
+    def difference(self, other):
+        if not self.is_union_compatible(other):
+            raise NotUnionCompatible
+
+        new_relation = self.clone()
+        for tuple_ in set(self).difference(set(other)):
+            new_relation.add(*tuple_)
         return new_relation
 
     def add(self, *args, **kwargs):
