@@ -1,3 +1,5 @@
+import functools
+
 import urecord
 
 
@@ -18,6 +20,15 @@ class UndefinedFields(RelationalError):
 class NotUnionCompatible(RelationalError):
     """A set operation was attempted between non-union-compatible relations."""
     pass
+
+
+def check_union_compatible(method):
+    @functools.wraps(method)
+    def wrapper(self, other):
+        if not self.is_union_compatible(other):
+            raise NotUnionCompatible
+        return method(self, other)
+    return wrapper
 
 
 class Relation(object):
@@ -50,28 +61,22 @@ class Relation(object):
     def is_union_compatible(self, other):
         return self.heading == other.heading
 
+    @check_union_compatible
     def union(self, other):
-        if not self.is_union_compatible(other):
-            raise NotUnionCompatible
-
         new_relation = self.clone()
         for tuple_ in set(self).union(other):
             new_relation.add(*tuple_)
         return new_relation
 
+    @check_union_compatible
     def intersection(self, other):
-        if not self.is_union_compatible(other):
-            raise NotUnionCompatible
-
         new_relation = self.clone()
         for tuple_ in set(self).intersection(set(other)):
             new_relation.add(*tuple_)
         return new_relation
 
+    @check_union_compatible
     def difference(self, other):
-        if not self.is_union_compatible(other):
-            raise NotUnionCompatible
-
         new_relation = self.clone()
         for tuple_ in set(self).difference(set(other)):
             new_relation.add(*tuple_)
