@@ -24,6 +24,9 @@ class Relation(object):
 
         return type(self)(*self.tuple._fields)
 
+    def is_union_compatible(self, other):
+        return self.heading == other.heading
+
     def add(self, *args, **kwargs):
 
         """
