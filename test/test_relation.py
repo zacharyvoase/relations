@@ -66,7 +66,7 @@ def test_project_raises_error_on_undefined_fields():
     employees.add(employee_name='Alice', dept_name='Finance')
     employees.add(employee_name='Bob', dept_name='Sales')
 
-    assert_raises(relations.RelationalError,
+    assert_raises(relations.UndefinedFields,
                   lambda: employees.project('foobar'))
 
 
@@ -95,5 +95,5 @@ def test_rename_raises_error_on_undefined_fields():
     employees.add(employee_name='Alice', dept_name='Finance')
     employees.add(employee_name='Bob', dept_name='Sales')
 
-    assert_raises(relations.RelationalError,
+    assert_raises(relations.UndefinedFields,
                   lambda: employees.rename(newfield='foobar'))

@@ -2,7 +2,17 @@ import urecord
 
 
 class RelationalError(Exception):
-    """Something attempted to perform an undefined or invalid operation."""
+    """An undefined or invalid operation was attempted."""
+    pass
+
+
+class UndefinedFields(RelationalError):
+    """An undefined field was used in an operation on one or more relations."""
+    pass
+
+
+class NotUnionCompatible(RelationalError):
+    """A set operation was attempted between non-union-compatible relations."""
     pass
 
 
@@ -114,7 +124,7 @@ class Relation(object):
         new_relation = type(self)(*fields)
         if not new_relation.heading.issubset(self.heading):
             undefined_fields = tuple(new_relation.heading.difference(self.heading))
-            raise RelationalError("Undefined fields used in project(): %r" %
+            raise UndefinedFields("Undefined fields used in project(): %r" %
                                   undefined_fields)
 
         # Example: given the relation ('a', 'b', 'c') and fields ('a', 'c'),
@@ -142,7 +152,7 @@ class Relation(object):
             raise RelationalError("Field mapping is not one-to-one")
         elif not set(new_fields.values()).issubset(self.heading):
             undefined_fields = tuple(set(new_fields.values()).difference(self.heading))
-            raise RelationalError("Undefined fields used in rename(): %r" %
+            raise UndefinedFields("Undefined fields used in rename(): %r" %
                                   undefined_fields)
 
         # Mapping from old field name => new field name.
