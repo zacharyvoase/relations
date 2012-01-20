@@ -24,7 +24,7 @@ class Relation(object):
 
     def __init__(self, *fields):
         self.heading = frozenset(fields)
-        self.tuple = urecord.Record(*fields)
+        self.tuple = urecord.Record(*sorted(fields))
         # Mapping of tuples => ids.
         self.tuples = {}
         # Mapping of ids => tuples.

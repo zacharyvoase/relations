@@ -10,9 +10,11 @@ Create a relation with a heading (i.e. a list of field names):
     >>> import relations
     >>> employees = relations.Relation('employee_name', 'dept_name')
     >>> employees
-    <Relation('employee_name', 'dept_name')>
+    <Relation('dept_name', 'employee_name')>
 
-Add tuples to the relation:
+The fields are re-ordered alphabetically, so that the order of values in tuples
+is consistent between equivalent but separate relations. Add tuples to the
+relation:
 
     >>> alice = employees.add(employee_name='Alice', dept_name='Finance')
     >>> bob = employees.add(employee_name='Alice', dept_name='Finance')
