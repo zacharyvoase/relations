@@ -48,14 +48,11 @@ and **Rename**:
     >>> employees_renamed.contains(name='Bob')
     True
 
+It also supports the set operations **Union**, **Intersection** and
+**Difference**.
+
 
 ## Coming Soon
-
-Set operations on union-compatible relations:
-
-* Set union
-* Set difference
-* Set intersection
 
 Joins:
 
