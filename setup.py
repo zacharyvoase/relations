@@ -4,7 +4,7 @@
 from distribute_setup import use_setuptools
 use_setuptools()
 
-from setuptools import setup
+from setuptools import setup, find_packages
 import os.path as p
 
 VERSION = open(p.join(p.dirname(p.abspath(__file__)), 'VERSION')).read().strip()
@@ -18,5 +18,7 @@ setup(
     url='http://github.com/zacharyvoase/relations',
     packages=find_packages(where='lib'),
     package_dir={'': 'lib'},
-    test_suite='relations._get_tests',
+    install_requires=[
+        'urecord>=0.0.3',
+    ],
 )
