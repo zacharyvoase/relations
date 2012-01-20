@@ -16,6 +16,9 @@ class Relation(object):
         # Mapping of ids => tuples.
         self.index = {}
 
+    def __repr__(self):
+        return '<Relation%r>' % (self.tuple._fields,)
+
     def clone(self):
         """Create a new, empty relation with the same heading as this one."""
 
