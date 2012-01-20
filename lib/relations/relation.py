@@ -1,6 +1,10 @@
 import urecord
 
 
+__all__ = ['Relation', 'RelationalError', 'UndefinedFields',
+           'NotUnionCompatible']
+
+
 class RelationalError(Exception):
     """An undefined or invalid operation was attempted."""
     pass

@@ -1,1 +1,1 @@
-from relations.relation import Relation, RelationalError
+from relations.relation import *
