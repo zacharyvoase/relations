@@ -1,6 +1,9 @@
 import functools
+from itertools import imap
 
 import urecord
+
+from relations.tuple import Tuple
 
 
 __all__ = ['Relation', 'RelationalError', 'UndefinedFields',
@@ -33,9 +36,9 @@ def check_union_compatible(method):
 
 class Relation(object):
 
-    def __init__(self, *fields):
+    def __init__(self, *fields, **kwargs):
         self.heading = frozenset(fields)
-        self.tuple = urecord.Record(*sorted(fields))
+        self.tuple = urecord.Record(*sorted(fields), instance=Tuple)
         self.tuples = {}
 
     def __repr__(self):
@@ -177,15 +180,12 @@ class Relation(object):
             raise UndefinedFields("Undefined fields used in project(): %r" %
                                   undefined_fields)
 
-        # Example: given the relation ('a', 'b', 'c') and fields ('a', 'c'),
-        # indices will have a value of (0, 2).
-        indices = map(self.tuple._fields.index, fields)
-        # Continued:
-        # project_one((a='foo', b='bar', c='baz')) => ('foo', 'baz')
-        project_one = lambda t: new_relation.tuple(*map(t.__getitem__, indices))
+        projection = self.tuple._make_projection(*fields)
 
-        new_relation.tuples.update(
-            (tuple_, tuple_) for tuple_ in map(project_one, self.tuples))
+        new_relation.tuples.update((tuple_, tuple_)
+            for tuple_ in imap(
+                lambda t: new_relation.tuple(*t._index_restrict(*projection)),
+                self.tuples))
         return new_relation
 
     def rename(self, **new_fields):
@@ -205,19 +205,19 @@ class Relation(object):
             raise UndefinedFields("Undefined fields used in rename(): %r" %
                                   undefined_fields)
 
-        # Construct a dict mapping from old field name => new field name.
-        rename = invert_bijection(new_fields)
-        for old_field_name in self.heading:
-            rename.setdefault(old_field_name, old_field_name)
+        renamed_fields = set(new_fields.values())
+        for field_name in self.heading:
+            if field_name not in renamed_fields:
+                new_fields[field_name] = field_name
 
-        new_relation = type(self)(*rename.values())
+        new_relation = type(self)(*new_fields.keys())
 
-        def rename_tuple(t):
-            return dict((new_name, getattr(t, old_name))
-                        for (old_name, new_name) in rename.iteritems())
+        reordering = self.tuple._make_reordering(**new_fields)
 
-        for _tuple in self:
-            new_relation.add(**rename_tuple(_tuple))
+        new_relation.tuples.update(
+            (tuple_, tuple_) for tuple_ in imap(
+                lambda t: new_relation.tuple(*t._index_restrict(*reordering)),
+                self.tuples))
         return new_relation
 
 
