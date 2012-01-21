@@ -19,6 +19,6 @@ setup(
     packages=find_packages(where='lib'),
     package_dir={'': 'lib'},
     install_requires=[
-        'urecord>=0.0.3',
+        'urecord>=0.0.4',
     ],
 )
