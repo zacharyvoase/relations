@@ -205,19 +205,32 @@ class Relation(object):
             raise UndefinedFields("Undefined fields used in rename(): %r" %
                                   undefined_fields)
 
+        # Get a complete bijection from new field names => old field names
         renamed_fields = set(new_fields.values())
         for field_name in self.heading:
             if field_name not in renamed_fields:
                 new_fields[field_name] = field_name
 
         new_relation = type(self)(*new_fields.keys())
-
         reordering = self.tuple._make_reordering(**new_fields)
-
         new_relation.tuples.update(
             (tuple_, tuple_) for tuple_ in imap(
                 lambda t: new_relation.tuple(*t._index_restrict(*reordering)),
                 self.tuples))
+        return new_relation
+
+    def natural_join(self, other):
+        new_relation = type(self)(*self.heading.union(other.heading))
+        common_fields = self.heading.intersection(other.heading)
+        projection1 = self.tuple._make_projection(*common_fields)
+        projection2 = other.tuple._make_projection(*common_fields)
+        for tuple1 in self:
+            for tuple2 in other:
+                if (tuple1._index_restrict(*projection1) ==
+                    tuple2._index_restrict(*projection2)):
+                    row = tuple1._asdict()
+                    row.update(tuple2._asdict())
+                    new_relation.add(**row)
         return new_relation
 
 
